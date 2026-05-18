@@ -1,0 +1,193 @@
+<!-- container for the mapbox map object -->
+<mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
+<div id="map"></div>
+<div id="tooltip"></div>
+<!-- button for legend for colors of piechart -->
+<button
+  mat-button
+  class="legend-button-piechart"
+  *ngIf="showPieLegendButton"
+  (click)="showPiechartLegend()"
+>
+  Legend
+</button>
+<div *ngIf="showPieLegend" class="piechart-legend" id="pieleg" [innerHTML]="pieLegendContent"></div>
+<div *ngIf="showPieLegend" class="downward-triangle"></div>
+
+<!-- sidebar container -->
+<div class="sidebar-slider" [class.sidebar-slide-in]="sidebarShow">
+  <!-- sidebar toggle button -->
+  <button class="sidebar-close" (click)="sidebarShow = !sidebarShow"></button>
+
+  <div class="sidebar-scroll">
+      <!-- Sidebar title -->
+    <div id="slidebar_title">
+      <div id="slidebar_title_left">
+        <img src="favicon.ico" />
+      </div>
+      <div id="slidebar_title_right">
+        <p class="abbr">J</p>ust <br />
+        <p class="abbr">A</p>nother <br />
+        <p class="abbr">C</p>arrier <br />
+        <p class="abbr">T</p>racker
+      </div>
+    </div>
+
+     <!-- Sidebar content -->
+  <div class="sidebar-content">
+    <!-- Use heading to separate content from title -->
+    <h2 class="set-align"></h2>
+    <!-- Area for datepicking -->
+    <div class="sidebar-date-range">
+      <!-- Form field for range datepicker -->
+      <mat-form-field appearance="fill" id="dateform">
+        <!-- Text above the input field -->
+        <mat-label>Enter a date range</mat-label>
+        <!-- date range picker -->
+        <mat-date-range-input
+          [rangePicker]="picker"
+          [formGroup]="range"
+          [min]="minDate"
+          [max]="maxDate"
+          [disabled]="rangeDisabled"
+        >
+          <input
+            matStartDate
+            formControlName="start"
+            placeholder="2020-01-01"
+          />
+          <input matEndDate formControlName="end" placeholder="2020-01-31" />
+        </mat-date-range-input>
+        <!-- define "event listener" of the picker -->
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="picker"
+        ></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+    </div>
+    <div class="datenote">
+      Please note: no selected date range queries the entire time range
+      (2012-now)
+    </div>
+
+    <!-- Area for options, i.e. checkboxes -->
+    <div class="sidebar-checkboxes">
+      <hr />
+      <mat-slide-toggle
+        color="primary"
+        (change)="volumeCheckBoxChange($event)"
+        [disabled]="pieChartDisabled"
+      >
+        <p class="toggle-text">Show import/export volumes</p></mat-slide-toggle
+      ><button
+        mat-mini-fab
+        class="hint-button"
+        color="primary"
+        matTooltip="Shows which countries gather fish from which bodies of water 
+        to identify what the import and export shares of a country in regard to fishing carriers are.
+        The bigger the pie charts, the more fish is imported and the lines link the countries that export 
+        fish to the pie chart of the importing country"
+        matTooltipPosition="after"
+        matTooltipClass="sidebar-hint-tooltip"
+      >
+        i</button
+      ><br />
+      <hr />
+      <mat-slide-toggle
+        color="primary"
+        (change)="encountersCheckBoxChange($event)"
+        [disabled]="encounterDisabled"
+        >Show encounter heatmap</mat-slide-toggle
+      ><button
+        mat-mini-fab
+        class="hint-button"
+        color="primary"
+        matTooltip="Identifies hotspots of authorized as well as unauthorized encounters. The green dots represent 
+        authorized encounters, the red dots unauthorized encounters. The darker the color of a hotspot, the more 
+        events occur within it"
+        matTooltipPosition="after"
+        matTooltipClass="sidebar-hint-tooltip"
+      >
+        i</button
+      ><br /><br />
+      <div class="sidebar-multiple-option-checkboxes">
+        <mat-slide-toggle
+          color="primary"
+          [(ngModel)]="checkedAuthorized"
+          [disabled]="showAuthorizedDisabled"
+          (change)="showAuthorizedOnly($event)"
+          >authorized encounters</mat-slide-toggle
+        ><br /><br />
+        <mat-slide-toggle
+          color="primary"
+          [(ngModel)]="checkedUnauthorized"
+          [disabled]="showUnauthorizedDisabled"
+          (change)="showUnauthorizedOnly($event)"
+          >unauthorized encounters</mat-slide-toggle
+        ><br />
+      </div>
+      <div class="encounter-filter-container-1">
+        <mat-form-field appearance="fill">
+          <mat-label>Filter by country</mat-label>
+          <mat-select [(value)]="selected_country" [disabled]="disabledCountryFilter" (selectionChange)="applyFilter()">
+            <mat-option>None</mat-option>
+            <mat-option *ngFor="let country of country_names" value="{{country}}">{{country}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="encounter-filter-container-2">
+        <mat-form-field appearance="fill">
+          <mat-label>Filter by ship</mat-label>
+          <mat-select [(value)]="selected_ship" [disabled]="disabledShipFilter" (selectionChange)="applyFilter()">
+            <mat-option>None</mat-option>
+            <mat-option *ngFor="let ship of ship_names" value="{{ship}}">{{ship}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <hr />
+      <mat-slide-toggle
+        color="primary"
+        (change)="portsCheckBoxChange($event)"
+        [disabled]="portDisabled"
+        ><p class="toggle-text">
+          Show arrivals/departures per port
+        </p></mat-slide-toggle
+      ><button
+        mat-mini-fab
+        class="hint-button"
+        color="primary"
+        matTooltip="Shows how many ships arrive in and departe from a port in the given time range"
+        matTooltipPosition="after"
+        matTooltipClass="sidebar-hint-tooltip"
+      >
+        i</button
+      ><br />
+      <hr />
+      <mat-slide-toggle
+        color="primary"
+        (change)="barchartCheckBoxChange($event)"
+        [disabled]="barChartDisabled"
+        ><p class="toggle-text">
+          Overview of distances per country
+        </p></mat-slide-toggle
+      ><button
+        mat-mini-fab
+        class="hint-button"
+        color="primary"
+        matTooltip="Determines which countries travel the farthest to gather fish. Shows the 
+        average median distance travelled for the top-5 countries"
+        matTooltipPosition="after"
+        matTooltipClass="sidebar-hint-tooltip"
+      >
+        i
+      </button>
+    </div>
+  </div>
+
+
+  </div>
+
+  
+ 
+</div>

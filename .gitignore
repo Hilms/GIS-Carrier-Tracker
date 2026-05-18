@@ -1,0 +1,66 @@
+# =========================
+# OS / Mac
+# =========================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.env
+venv/
+.venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# =========================
+# Node / Angular (Frontend)
+# =========================
+node_modules/
+dist/
+build/
+coverage/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Angular
+.angular/
+.cache/
+
+# =========================
+# Docker
+# =========================
+*.log
+docker-compose.override.yml
+
+# =========================
+# Database / Dumps
+# =========================
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+
+# optional
+database/import/*.csv
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+
+frontend/jact/node_modules/
+frontend/jact/.angular/
+database/import/*.sql
